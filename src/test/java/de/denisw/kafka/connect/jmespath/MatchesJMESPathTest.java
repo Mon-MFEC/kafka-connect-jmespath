@@ -30,6 +30,14 @@ class MatchesJMESPathTest {
             .field("address", ADDRESS_SCHEMA)
             .build();
 
+    private static final Schema KEY_SCHEMA = SchemaBuilder
+            .struct()
+            .name("KEY_User")
+            .field("email", Schema.STRING_SCHEMA);
+
+    private static final Struct EXAMPLE_KEYUSER = new Struct(KEY_SCHEMA)
+            .put("email", "alice@example.com");
+
     private static final Struct EXAMPLE_USER = new Struct(USER_SCHEMA)
             .put("email", "alice@example.com")
             .put("name", "Alice Example")
@@ -39,11 +47,31 @@ class MatchesJMESPathTest {
                     .put("city", "Berlin")
                     .put("country", "DE"));
 
+    private static final SinkRecord EXAMPLE_RECORD2 = new SinkRecord(
+            "topic",
+            0,
+            KEY_SCHEMA,
+            EXAMPLE_KEYUSER,
+            USER_SCHEMA,
+            null,
+            0);
+
+    private static final SinkRecord EXAMPLE_RECORD3 = new SinkRecord(
+            "topic",
+            0,
+            KEY_SCHEMA,
+            EXAMPLE_KEYUSER,
+            null,
+            EXAMPLE_USER,
+            0);
+
+
+
     private static final SinkRecord EXAMPLE_RECORD = new SinkRecord(
             "topic",
             0,
-            Schema.STRING_SCHEMA,
-            "alice@example.com",
+            KEY_SCHEMA,
+            EXAMPLE_KEYUSER,
             USER_SCHEMA,
             EXAMPLE_USER,
             0);
@@ -54,7 +82,7 @@ class MatchesJMESPathTest {
                 new MatchesJMESPath.Key<>();
 
         predicate.configure(Collections.singletonMap(
-                "query", "@ == 'alice@example.com'"));
+                "query", "email == 'alice@example.com'"));
 
         assertTrue(predicate.test(EXAMPLE_RECORD));
     }
@@ -65,7 +93,7 @@ class MatchesJMESPathTest {
                 new MatchesJMESPath.Key<>();
 
         predicate.configure(Collections.singletonMap(
-                "query", "@ == 'bob@example.com'"));
+                "query", "email == 'bob@example.com'"));
 
         assertFalse(predicate.test(EXAMPLE_RECORD));
     }
@@ -80,5 +108,32 @@ class MatchesJMESPathTest {
 
         assertFalse(predicate.test(EXAMPLE_RECORD));
     }
+
+    @Test
+    void nonMatchingValue2() {
+        MatchesJMESPath.Value<SinkRecord> predicate =
+                new MatchesJMESPath.Value<>();
+
+        predicate.configure(Collections.singletonMap(
+                "query", "address.city == 'New York'"));
+
+        assertFalse(predicate.test(EXAMPLE_RECORD2));
+    }
+
+
+    @Test
+    void nonMatchingValue3() {
+        MatchesJMESPath.Value<SinkRecord> predicate =
+                new MatchesJMESPath.Value<>();
+
+        predicate.configure(Collections.singletonMap(
+                "query", "address.city == 'New York'"));
+
+        assertFalse(predicate.test(EXAMPLE_RECORD3));
+    }
+
+
+
+
 
 }
