@@ -1,6 +1,7 @@
 package de.denisw.kafka.connect.jmespath;
 
 import io.burt.jmespath.Expression;
+import io.burt.jmespath.node.NegateNode;
 import io.burt.jmespath.parser.ParseException;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
@@ -9,8 +10,11 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.predicates.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -38,6 +42,8 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
     private final String debeziumSchemaChange = "SchemaChangeValue";
     public static final String OVERVIEW_DOC = "Detect the byte fields and copy it to the new fields.";
     private static final String PURPOSE = OVERVIEW_DOC;
+    private final Logger logger = LoggerFactory.getLogger(MatchesJMESPath.class);
+
 
     @Override
     public ConfigDef config() {
@@ -61,14 +67,21 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
         }
 
         Struct value = requireStruct(dataToMatch(record), PURPOSE);
+
         Schema valueSchema = value.schema();
         String valueSchemaName = valueSchema.name();
         if (valueSchemaName != null && valueSchemaName.contains(debeziumSchemaChange)){
             return false;
         }
 
-
         Object result = expression.search(dataToMatch(record));
+        if (result instanceof NegateNode){
+            logger.warn("monnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+        }
+
+        if (expression instanceof NegateNode){
+            logger.warn("piaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        }
         return runtime.isTruthy(result);
     }
 

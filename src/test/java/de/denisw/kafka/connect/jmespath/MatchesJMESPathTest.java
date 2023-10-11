@@ -1,12 +1,16 @@
 package de.denisw.kafka.connect.jmespath;
 
+import org.apache.kafka.connect.data.Decimal;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,8 +39,18 @@ class MatchesJMESPathTest {
             .name("KEY_User")
             .field("email", Schema.STRING_SCHEMA);
 
+    private static final Schema KEY_SCHEMA2 = SchemaBuilder
+            .struct()
+            .name("KEY_User")
+            .field("email", Decimal.builder(5));
+
+    private static final Struct EXAMPLE_KEYUSER2 = new Struct(KEY_SCHEMA2)
+            .put("email", new BigDecimal("123456789123456789123456789123456789123456789123456789"));
+
     private static final Struct EXAMPLE_KEYUSER = new Struct(KEY_SCHEMA)
             .put("email", "alice@example.com");
+
+
 
     private static final Struct EXAMPLE_USER = new Struct(USER_SCHEMA)
             .put("email", "alice@example.com")
@@ -46,6 +60,15 @@ class MatchesJMESPathTest {
                     .put("postalCode", "12345")
                     .put("city", "Berlin")
                     .put("country", "DE"));
+
+    private static final SinkRecord EXAMPLE_RECORD22 = new SinkRecord(
+            "topic",
+            0,
+            KEY_SCHEMA2,
+            EXAMPLE_KEYUSER2,
+            null,
+            null,
+            0);
 
     private static final SinkRecord EXAMPLE_RECORD2 = new SinkRecord(
             "topic",
@@ -75,6 +98,19 @@ class MatchesJMESPathTest {
             USER_SCHEMA,
             EXAMPLE_USER,
             0);
+
+
+    @Test
+    void matchingKey4() {
+        MatchesJMESPath.Key<SinkRecord> predicate =
+                new MatchesJMESPath.Key<>();
+
+        Map<String, String> props = new HashMap<>();
+        props.put("query", "email < `123456789123456789123456789123456789123456789123456789.00000000000000000000000000000000001`");
+        predicate.configure(props);
+
+        assertTrue(predicate.test(EXAMPLE_RECORD22));
+    }
 
     @Test
     void matchingKey() {

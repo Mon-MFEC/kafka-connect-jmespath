@@ -6,6 +6,7 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,12 +32,12 @@ class ConnectJMESPathRuntimeTest {
 
         Map<String, ?> objectMap = (Map<String, ?>) result;
         assertEquals(true, objectMap.get("boolean"), "boolean property");
-        assertEquals(123L, objectMap.get("number"), "number property");
+        assertEquals(new BigDecimal("123"), objectMap.get("number"), "number property");
         assertEquals("foo", objectMap.get("string"), "string property");
 
-        List<Long> expectedList = new ArrayList<>();
-        expectedList.add(1L);
-        expectedList.add(2L);
+        List<BigDecimal> expectedList = new ArrayList<>();
+        expectedList.add(new BigDecimal("1"));
+        expectedList.add(new BigDecimal("2"));
         assertEquals(expectedList, objectMap.get("array"), "array property");
     }
 

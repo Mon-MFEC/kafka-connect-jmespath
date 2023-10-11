@@ -6,6 +6,7 @@ import io.burt.jmespath.jcf.JsonParser;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,9 +16,78 @@ import java.util.stream.Collectors;
  */
 public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
+    public int compare(Object value1, Object value2) {
+        //System.out.println("aaaaaaaa");
+        JmesPathType type1 = typeOf(value1);
+        JmesPathType type2 = typeOf(value2);
+        if (type1 == type2) {
+            switch (type1) {
+                case NULL:
+                    return 0;
+                case BOOLEAN:
+                    return isTruthy(value1) == isTruthy(value2) ? 0 : -1;
+                case NUMBER:
+                    //double d1 = toNumber(value1).doubleValue();
+                    //double d2 = toNumber(value2).doubleValue();
+
+                    BigDecimal k1 = (BigDecimal) value1;
+                    BigDecimal k2 = (BigDecimal) value2;
+
+                    //System.out.println(k1);
+                    //System.out.println(k2);
+
+                    return k1.compareTo(k2);
+                case STRING:
+                    String s1 = toString(value1);
+                    String s2 = toString(value2);
+                    return s1.compareTo(s2);
+                case ARRAY:
+                    return deepEqualsArray(value1, value2) ? 0 : -1;
+                case OBJECT:
+                    return deepEqualsObject(value1, value2) ? 0 : -1;
+                default:
+                    throw new IllegalStateException(String.format("Unknown node type encountered: %s", value1.getClass().getName()));
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    private boolean deepEqualsObject(Object value1, Object value2) {
+        Collection<Object> keys1 = getPropertyNames(value1);
+        Collection<Object> keys2 = getPropertyNames(value2);
+        if (keys1.size() != keys2.size()) {
+            return false;
+        }
+        if (!keys1.containsAll(keys2)) {
+            return false;
+        }
+        for (Object key : keys1) {
+            if (compare(getProperty(value1, key), getProperty(value2, key)) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean deepEqualsArray(Object value1, Object value2) {
+        List<Object> values1 = toList(value1);
+        List<Object> values2 = toList(value2);
+        int size = values1.size();
+        if (size != values2.size()) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (compare(values1.get(i), values2.get(i)) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public Object parseString(String str) {
-        return JsonParser.fromString(str, this);
+        return JsonParserBigNumeric.fromString(str, this);
     }
 
     @Override
@@ -78,6 +148,8 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
         }
     }
 
+
+
     @Override
     @SuppressWarnings("unchecked")
     public List<Object> toList(Object value) {
@@ -110,7 +182,13 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
     @Override
     public Object createNumber(double n) {
+
+
         return n;
+    }
+
+    public Object createNumber(BigDecimal b) {
+        return b;
     }
 
     @Override

@@ -1,11 +1,13 @@
 package de.denisw.kafka.connect.jmespath;
 
 import io.burt.jmespath.Expression;
+import org.apache.kafka.connect.data.Decimal;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +65,7 @@ public class JMESPathTest {
                 .name("Date")
                 .field("day", Schema.INT32_SCHEMA)
                 .field("month", Schema.INT32_SCHEMA)
-                .field("year", Schema.INT32_SCHEMA)
+                .field("year", Decimal.builder(5))
                 .build();
 
         Schema bookSchema = SchemaBuilder.struct()
@@ -79,14 +81,14 @@ public class JMESPathTest {
                 .put("publishDate", new Struct(dateSchema)
                         .put("day", 31)
                         .put("month", 10)
-                        .put("year", 1994));
-        Object book2 =  new Struct(bookSchema)
+                        .put("year", new BigDecimal("1994")));
+        Object book2 = new Struct(bookSchema)
                 .put("name", "Designing Data-Intensive Applications")
                 .put("author", "Martin Kleppmann")
                 .put("publishDate", new Struct(dateSchema)
                         .put("day", 25)
                         .put("month", 4)
-                        .put("year", 2015));
+                        .put("year", new BigDecimal("2015")));
 
         Object result1 = expression.search(book1);
         Object result2 = expression.search(book2);
