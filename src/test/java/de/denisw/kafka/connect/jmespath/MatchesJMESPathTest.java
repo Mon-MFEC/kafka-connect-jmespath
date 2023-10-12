@@ -79,6 +79,15 @@ class MatchesJMESPathTest {
             null,
             0);
 
+    private static final SinkRecord EXAMPLE_RECORD222 = new SinkRecord(
+            "topic",
+            0,
+            KEY_SCHEMA,
+            EXAMPLE_KEYUSER,
+            USER_SCHEMA,
+            EXAMPLE_USER,
+            0);
+
     private static final SinkRecord EXAMPLE_RECORD3 = new SinkRecord(
             "topic",
             0,
@@ -110,6 +119,31 @@ class MatchesJMESPathTest {
         predicate.configure(props);
 
         assertTrue(predicate.test(EXAMPLE_RECORD22));
+    }
+
+    @Test
+    void matchingKey5() {
+        MatchesJMESPath.Key<SinkRecord> predicate =
+                new MatchesJMESPath.Key<>();
+
+        Map<String, String> props = new HashMap<>();
+        props.put("query", "email == 'alice@example.com'");
+        predicate.configure(props);
+
+        assertFalse(predicate.test(EXAMPLE_RECORD222));
+    }
+
+
+    @Test
+    void matchingKey6() {
+        MatchesJMESPath.Value<SinkRecord> predicate =
+                new MatchesJMESPath.Value<>();
+
+        Map<String, String> props = new HashMap<>();
+        props.put("query", "email == 'StephenHawking'");
+        predicate.configure(props);
+
+        assertTrue(predicate.test(EXAMPLE_RECORD222));
     }
 
     @Test

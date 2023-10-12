@@ -17,9 +17,12 @@ import java.util.stream.Collectors;
 public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
     public int compare(Object value1, Object value2) {
-        //System.out.println("aaaaaaaa");
         JmesPathType type1 = typeOf(value1);
         JmesPathType type2 = typeOf(value2);
+
+        //System.out.println(type1);
+        //System.out.println(type2);
+
         if (type1 == type2) {
             switch (type1) {
                 case NULL:
@@ -214,11 +217,16 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
     @Override
     @SuppressWarnings("unchecked")
     public Object getProperty(Object value, Object name) {
+        //System.out.println("kkkkkkkkkkkkkkkkk");
+        System.out.println(String.valueOf(name));
         if (value instanceof Map) {
+            System.out.println("Map");
             return ((Map<Object, Object>) value).get(name);
         } else if (value instanceof Struct) {
+            System.out.println("Struct");
             return ((Struct) value).get((String) name);
         } else {
+            System.out.println("null");
             return null;
         }
     }
