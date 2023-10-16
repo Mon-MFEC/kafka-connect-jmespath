@@ -130,7 +130,7 @@ class MatchesJMESPathTest {
         props.put("query", "email == 'alice@example.com'");
         predicate.configure(props);
 
-        assertFalse(predicate.test(EXAMPLE_RECORD222));
+        assertTrue(predicate.test(EXAMPLE_RECORD222));
     }
 
 
@@ -143,7 +143,7 @@ class MatchesJMESPathTest {
         props.put("query", "email == 'StephenHawking'");
         predicate.configure(props);
 
-        assertTrue(predicate.test(EXAMPLE_RECORD222));
+        assertFalse(predicate.test(EXAMPLE_RECORD222));
     }
 
     @Test

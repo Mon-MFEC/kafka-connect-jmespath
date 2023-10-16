@@ -3,6 +3,7 @@ package de.denisw.kafka.connect.jmespath;
 import io.burt.jmespath.BaseRuntime;
 import io.burt.jmespath.JmesPathType;
 import io.burt.jmespath.jcf.JsonParser;
+import io.burt.jmespath.node.OperatorNode;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 
@@ -95,6 +96,7 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
     @Override
     public JmesPathType typeOf(Object value) {
+
         if (value == null) {
             return JmesPathType.NULL;
         } else if (value instanceof Boolean) {
@@ -201,6 +203,7 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
     @Override
     public Object createString(String str) {
+        //System.out.println(str);
         return str;
     }
 
@@ -218,15 +221,15 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
     @SuppressWarnings("unchecked")
     public Object getProperty(Object value, Object name) {
         //System.out.println("kkkkkkkkkkkkkkkkk");
-        System.out.println(String.valueOf(name));
+        //System.out.println(String.valueOf(name));
         if (value instanceof Map) {
-            System.out.println("Map");
+            //System.out.println("Map");
             return ((Map<Object, Object>) value).get(name);
         } else if (value instanceof Struct) {
-            System.out.println("Struct");
+            //System.out.println("Struct");
             return ((Struct) value).get((String) name);
         } else {
-            System.out.println("null");
+            //System.out.println("null");
             return null;
         }
     }

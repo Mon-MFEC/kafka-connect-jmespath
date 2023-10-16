@@ -1,6 +1,7 @@
 package de.denisw.kafka.connect.jmespath;
 
 import io.burt.jmespath.Expression;
+import io.burt.jmespath.node.ComparisonNode;
 import io.burt.jmespath.node.NegateNode;
 import io.burt.jmespath.parser.ParseException;
 import org.apache.kafka.common.config.ConfigDef;
@@ -53,6 +54,8 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
     @Override
     public void configure(Map<String, ?> configs) {
         String query = (String) configs.get("query");
+        String query2 = (String) configs.get("negate");
+        logger.warn(query2);
         try {
             expression = runtime.compile(query);
         } catch (ParseException e) {
@@ -66,6 +69,7 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
             return false;
         }
 
+
         Struct value = requireStruct(dataToMatch(record), PURPOSE);
 
         Schema valueSchema = value.schema();
@@ -74,14 +78,10 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
             return false;
         }
 
-        Object result = expression.search(dataToMatch(record));
-        if (result instanceof NegateNode){
-            logger.warn("monnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
-        }
 
-        if (expression instanceof NegateNode){
-            logger.warn("piaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        }
+        Object result = expression.search(dataToMatch(record));
+        //System.out.printf(expression.toString());
+        logger.warn(expression.toString());
         return runtime.isTruthy(result);
     }
 
