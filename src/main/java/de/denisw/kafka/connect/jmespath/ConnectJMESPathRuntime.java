@@ -44,38 +44,6 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
         }
     }
 
-    private boolean deepEqualsArray(Object value1, Object value2) {
-        List<Object> values1 = toList(value1);
-        List<Object> values2 = toList(value2);
-        int size = values1.size();
-        if (size != values2.size()) {
-            return false;
-        }
-        for (int i = 0; i < size; i++) {
-            if (compare(values1.get(i), values2.get(i)) != 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean deepEqualsObject(Object value1, Object value2) {
-        Collection<Object> keys1 = getPropertyNames(value1);
-        Collection<Object> keys2 = getPropertyNames(value2);
-        if (keys1.size() != keys2.size()) {
-            return false;
-        }
-        if (!keys1.containsAll(keys2)) {
-            return false;
-        }
-        for (Object key : keys1) {
-            if (compare(getProperty(value1, key), getProperty(value2, key)) != 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @Override
     public Object parseString(String str) {
         return JsonParserForBigNumeric.fromString(str, this);
@@ -178,6 +146,7 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
     public Object createNumber(long n) {
         return n;
     }
+
     public Object createNumber(BigDecimal n) {
         return n;
     }
@@ -274,5 +243,37 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
         sb.append('}');
         return sb.toString();
+    }
+
+    private boolean deepEqualsArray(Object value1, Object value2) {
+        List<Object> values1 = toList(value1);
+        List<Object> values2 = toList(value2);
+        int size = values1.size();
+        if (size != values2.size()) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (compare(values1.get(i), values2.get(i)) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean deepEqualsObject(Object value1, Object value2) {
+        Collection<Object> keys1 = getPropertyNames(value1);
+        Collection<Object> keys2 = getPropertyNames(value2);
+        if (keys1.size() != keys2.size()) {
+            return false;
+        }
+        if (!keys1.containsAll(keys2)) {
+            return false;
+        }
+        for (Object key : keys1) {
+            if (compare(getProperty(value1, key), getProperty(value2, key)) != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

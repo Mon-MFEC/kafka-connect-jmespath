@@ -5,6 +5,9 @@ import io.burt.jmespath.parser.ParseException;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.ConnectRecord;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.predicates.Predicate;
 
 import java.util.Map;
@@ -20,6 +23,8 @@ import java.util.Map;
  * @see <a href="https://jmespath.org/">JMESPath</a>
  */
 public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Predicate<R> {
+    public static final String OVERVIEW_DOC = "Copy fields and value to the new fields.";
+    private static final String PURPOSE = OVERVIEW_DOC;
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef().define(
             "query",
@@ -29,6 +34,7 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
             ConfigDef.Importance.HIGH,
             "The JMESPath query to evaluate for each record.");
 
+    private final String debeziumSchemaChange = "SchemaChangeValue";
     private final ConnectJMESPathRuntime runtime = new ConnectJMESPathRuntime();
     private Expression<Object> expression;
 
@@ -49,8 +55,29 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
 
     @Override
     public boolean test(R record) {
-        Object result = expression.search(dataToMatch(record));
+        Object valueObject = operatingValue(record);
+        Schema valueSchema = operatingSchema(record);
+        if (valueObject == null || valueSchema == null)
+            return false;
+
+        Struct value = requireStruct(operatingValue(record), PURPOSE);
+        String valueSchemaName = valueSchema.name();
+        if (valueSchemaName != null && valueSchemaName.contains(debeziumSchemaChange))
+            return false;
+
+        Object result = expression.search(value);
         return runtime.isTruthy(result);
+    }
+
+    private Struct requireStruct(Object value, String purpose) {
+        if (!(value instanceof Struct)) {
+            throw new DataException("Only Struct objects supported for [" + purpose + "], found: " + nullSafeClassName(value));
+        }
+        return (Struct) value;
+    }
+
+    private String nullSafeClassName(Object x) {
+        return x == null ? "null" : x.getClass().getName();
     }
 
     @Override
@@ -58,7 +85,9 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
         // Nothing to do
     }
 
-    protected abstract Object dataToMatch(R record);
+    protected abstract Schema operatingSchema(R record);
+
+    protected abstract Object operatingValue(R record);
 
     /**
      * A {@link MatchesJMESPath} predicate that applies the query to
@@ -66,7 +95,11 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
      */
     public static class Key<R extends ConnectRecord<R>> extends MatchesJMESPath<R> {
         @Override
-        protected Object dataToMatch(R record) {
+        protected Schema operatingSchema(R record) {
+            return record.keySchema();
+        }
+        @Override
+        protected Object operatingValue(R record) {
             return record.key();
         }
     }
@@ -77,7 +110,11 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
      */
     public static class Value<R extends ConnectRecord<R>> extends MatchesJMESPath<R> {
         @Override
-        protected Object dataToMatch(R record) {
+        protected Schema operatingSchema(R record) {
+            return record.valueSchema();
+        }
+        @Override
+        protected Object operatingValue(R record) {
             return record.value();
         }
     }
