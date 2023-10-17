@@ -118,7 +118,6 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
     public Object createNumber(long n) {
         return n;
     }
-
     public Object createNumber(BigDecimal n) {
         return n;
     }
