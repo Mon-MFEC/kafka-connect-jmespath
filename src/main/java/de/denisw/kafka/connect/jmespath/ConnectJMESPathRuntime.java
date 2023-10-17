@@ -6,6 +6,7 @@ import io.burt.jmespath.jcf.JsonParser;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,7 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
     @Override
     public Object parseString(String str) {
-        return JsonParser.fromString(str, this);
+        return JsonParserForBigNumeric.fromString(str, this);
     }
 
     @Override
@@ -115,6 +116,10 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
     @Override
     public Object createNumber(long n) {
+        return n;
+    }
+
+    public Object createNumber(BigDecimal n) {
         return n;
     }
 
