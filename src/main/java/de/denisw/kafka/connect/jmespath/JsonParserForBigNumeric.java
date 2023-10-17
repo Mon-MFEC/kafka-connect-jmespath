@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
-import io.burt.jmespath.Adapter;
 import io.burt.jmespath.antlr.v4.runtime.tree.ParseTree;
 import io.burt.jmespath.util.StringEscapeHelper;
 import io.burt.jmespath.util.AntlrHelper;
@@ -30,9 +28,9 @@ public class JsonParserForBigNumeric extends JmesPathBaseVisitor<Object> {
     );
 
     private final ParseTree tree;
-    private final Adapter<Object> runtime;
+    private final ConnectJMESPathRuntime runtime;
 
-    public static Object fromString(String json, Adapter<Object> runtime) {
+    public static Object fromString(String json, ConnectJMESPathRuntime runtime) {
         ParseErrorAccumulator errors = new ParseErrorAccumulator();
         JmesPathParser parser = AntlrHelper.createParser(json, errors);
         ParseTree tree = parser.jsonValue();
@@ -43,7 +41,7 @@ public class JsonParserForBigNumeric extends JmesPathBaseVisitor<Object> {
         }
     }
 
-    private JsonParserForBigNumeric(ParseTree tree, Adapter<Object> runtime) {
+    private JsonParserForBigNumeric(ParseTree tree, ConnectJMESPathRuntime runtime) {
         this.tree = tree;
         this.runtime = runtime;
     }
@@ -83,11 +81,6 @@ public class JsonParserForBigNumeric extends JmesPathBaseVisitor<Object> {
 
     @Override
     public Object visitJsonNumberValue(JmesPathParser.JsonNumberValueContext ctx) {
-//        if (ctx.REAL_OR_EXPONENT_NUMBER() != null) {
-//            return runtime.createNumber(Double.parseDouble(ctx.getText()));
-//        } else {
-//            return runtime.createNumber(Long.parseLong(ctx.getText()));
-//        }
         return runtime.createNumber(new BigDecimal(ctx.getText()));
     }
 

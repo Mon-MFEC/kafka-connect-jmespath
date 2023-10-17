@@ -2,7 +2,6 @@ package de.denisw.kafka.connect.jmespath;
 
 import io.burt.jmespath.BaseRuntime;
 import io.burt.jmespath.JmesPathType;
-import io.burt.jmespath.jcf.JsonParser;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Struct;
 
@@ -15,6 +14,67 @@ import java.util.stream.Collectors;
  * Kafka Connect data types.
  */
 public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
+    @Override
+    public int compare(Object value1, Object value2) {
+        JmesPathType type1 = typeOf(value1);
+        JmesPathType type2 = typeOf(value2);
+        if (type1 == type2) {
+            switch (type1) {
+                case NULL:
+                    return 0;
+                case BOOLEAN:
+                    return isTruthy(value1) == isTruthy(value2) ? 0 : -1;
+                case NUMBER:
+                    BigDecimal b1 = (BigDecimal) toNumber(value1);
+                    BigDecimal b2 = (BigDecimal) toNumber(value2);
+                    return b1.compareTo(b2);
+                case STRING:
+                    String s1 = toString(value1);
+                    String s2 = toString(value2);
+                    return s1.compareTo(s2);
+                case ARRAY:
+                    return deepEqualsArray(value1, value2) ? 0 : -1;
+                case OBJECT:
+                    return deepEqualsObject(value1, value2) ? 0 : -1;
+                default:
+                    throw new IllegalStateException(String.format("Unknown node type encountered: %s", value1.getClass().getName()));
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    private boolean deepEqualsArray(Object value1, Object value2) {
+        List<Object> values1 = toList(value1);
+        List<Object> values2 = toList(value2);
+        int size = values1.size();
+        if (size != values2.size()) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (compare(values1.get(i), values2.get(i)) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean deepEqualsObject(Object value1, Object value2) {
+        Collection<Object> keys1 = getPropertyNames(value1);
+        Collection<Object> keys2 = getPropertyNames(value2);
+        if (keys1.size() != keys2.size()) {
+            return false;
+        }
+        if (!keys1.containsAll(keys2)) {
+            return false;
+        }
+        for (Object key : keys1) {
+            if (compare(getProperty(value1, key), getProperty(value2, key)) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public Object parseString(String str) {
