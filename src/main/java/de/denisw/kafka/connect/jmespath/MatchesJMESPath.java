@@ -23,7 +23,7 @@ import java.util.Map;
  * @see <a href="https://jmespath.org/">JMESPath</a>
  */
 public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Predicate<R> {
-    public static final String OVERVIEW_DOC = "Copy fields and value to the new fields.";
+    public static final String OVERVIEW_DOC = "Custom predicate with value.";
     private static final String PURPOSE = OVERVIEW_DOC;
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef().define(

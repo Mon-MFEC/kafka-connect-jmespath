@@ -47,6 +47,7 @@ class ConnectJMESPathRuntimeTest {
         assertEquals(JmesPathType.BOOLEAN, runtime.typeOf(true), "boolean");
         assertEquals(JmesPathType.NUMBER, runtime.typeOf(123L), "long");
         assertEquals(JmesPathType.NUMBER, runtime.typeOf(123.45), "double");
+        assertEquals(JmesPathType.NUMBER, runtime.typeOf(new BigDecimal("122")), "BigDecimal");
         assertEquals(JmesPathType.STRING, runtime.typeOf(""), "string");
         assertEquals(JmesPathType.ARRAY, runtime.typeOf(Collections.emptyList()), "list");
         assertEquals(JmesPathType.OBJECT, runtime.typeOf(Collections.emptyMap()), "map");
@@ -58,6 +59,7 @@ class ConnectJMESPathRuntimeTest {
         assertTrue(runtime.isTruthy(true), "true");
         assertTrue(runtime.isTruthy(123L), "long");
         assertTrue(runtime.isTruthy(123.45), "double");
+        assertTrue(runtime.isTruthy(new BigDecimal("123.45")), "BigDecimal");
         assertTrue(runtime.isTruthy("foo"), "non-empty string");
         assertTrue(runtime.isTruthy(Collections.singletonList(1)), "non-empty list");
         assertTrue(runtime.isTruthy(Collections.singletonMap(1, 2)), "non-empty map");
@@ -77,6 +79,7 @@ class ConnectJMESPathRuntimeTest {
     void toNumber() {
         assertEquals(123L, runtime.toNumber(123L), "long");
         assertEquals(123.45, runtime.toNumber(123.45), "double");
+        assertEquals(new BigDecimal("123.45"), runtime.toNumber(new BigDecimal("123.45")), "BigDecimal");
         assertNull(runtime.toNumber(""), "not a number");
     }
 
@@ -104,6 +107,7 @@ class ConnectJMESPathRuntimeTest {
         assertEquals("true", runtime.toString(true), "boolean");
         assertEquals("123", runtime.toString(123L), "long");
         assertEquals("123.45", runtime.toString(123.45), "double");
+        assertEquals("123456789123456789123456789123456789.45", runtime.toString(new BigDecimal("123456789123456789123456789123456789.45")), "BigDecimal");
         assertEquals("foo", runtime.toString("foo"), "string");
 
         List<Object> array = new ArrayList<>();
@@ -131,6 +135,7 @@ class ConnectJMESPathRuntimeTest {
     void createNumber() {
         assertEquals(123L, runtime.createNumber(123L), "long");
         assertEquals(123.45, runtime.createNumber(123.45), "double");
+        assertEquals(new BigDecimal("123.45"), runtime.createNumber(new BigDecimal("123.45")), "BigDecimal");
     }
 
     @Test

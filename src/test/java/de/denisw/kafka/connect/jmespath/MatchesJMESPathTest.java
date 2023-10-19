@@ -1,11 +1,13 @@
 package de.denisw.kafka.connect.jmespath;
 
+import org.apache.kafka.connect.data.Decimal;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -18,7 +20,7 @@ class MatchesJMESPathTest {
             .name("Address")
             .field("street", Schema.STRING_SCHEMA)
             .field("city", Schema.STRING_SCHEMA)
-            .field("postalCode", Schema.STRING_SCHEMA)
+            .field("postalCode", Decimal.schema(0))
             .field("country", Schema.STRING_SCHEMA)
             .build();
 
@@ -35,7 +37,7 @@ class MatchesJMESPathTest {
             .put("name", "Alice Example")
             .put("address", new Struct(ADDRESS_SCHEMA)
                     .put("street", "Musterstr. 123")
-                    .put("postalCode", "12345")
+                    .put("postalCode", new BigDecimal("123456789123456789123456789123456789.123456789123456789"))
                     .put("city", "Berlin")
                     .put("country", "DE"));
 
@@ -79,6 +81,17 @@ class MatchesJMESPathTest {
                 "query", "address.city == 'New York'"));
 
         assertFalse(predicate.test(EXAMPLE_RECORD));
+    }
+
+    @Test
+    void MatchingValue() {
+        MatchesJMESPath.Value<SinkRecord> predicate =
+                new MatchesJMESPath.Value<>();
+
+        predicate.configure(Collections.singletonMap(
+                "query", "address.postalCode >= `123456789123456789123456789123456789.123456789123456788`"));
+
+        assertTrue(predicate.test(EXAMPLE_RECORD));
     }
 
 }
