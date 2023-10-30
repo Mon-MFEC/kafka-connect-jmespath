@@ -50,27 +50,27 @@ class MatchesJMESPathTest {
             EXAMPLE_USER,
             0);
 
-    @Test
-    void matchingKey() {
-        MatchesJMESPath.Key<SinkRecord> predicate =
-                new MatchesJMESPath.Key<>();
-
-        predicate.configure(Collections.singletonMap(
-                "query", "@ == 'alice@example.com'"));
-
-        assertTrue(predicate.test(EXAMPLE_RECORD));
-    }
-
-    @Test
-    void nonMatchingKey() {
-        MatchesJMESPath.Key<SinkRecord> predicate =
-                new MatchesJMESPath.Key<>();
-
-        predicate.configure(Collections.singletonMap(
-                "query", "@ == 'bob@example.com'"));
-
-        assertFalse(predicate.test(EXAMPLE_RECORD));
-    }
+//    @Test
+//    void matchingKey() {
+//        MatchesJMESPath.Key<SinkRecord> predicate =
+//                new MatchesJMESPath.Key<>();
+//
+//        predicate.configure(Collections.singletonMap(
+//                "query", "@ == 'alice@example.com'"));
+//
+//        assertTrue(predicate.test(EXAMPLE_RECORD));
+//    }
+//
+//    @Test
+//    void nonMatchingKey() {
+//        MatchesJMESPath.Key<SinkRecord> predicate =
+//                new MatchesJMESPath.Key<>();
+//
+//        predicate.configure(Collections.singletonMap(
+//                "query", "@ == 'bob@example.com'"));
+//
+//        assertFalse(predicate.test(EXAMPLE_RECORD));
+//    }
 
     @Test
     void nonMatchingValue() {

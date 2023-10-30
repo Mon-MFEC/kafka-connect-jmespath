@@ -33,7 +33,6 @@ public abstract class MatchesJMESPath<R extends ConnectRecord<R>> implements Pre
             new ConfigDef.NonEmptyString(),
             ConfigDef.Importance.HIGH,
             "The JMESPath query to evaluate for each record.");
-
     private final String debeziumSchemaChange = "SchemaChangeValue";
     private final ConnectJMESPathRuntime runtime = new ConnectJMESPathRuntime();
     private Expression<Object> expression;
