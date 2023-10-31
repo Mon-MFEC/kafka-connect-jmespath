@@ -51,6 +51,8 @@ public class ConnectJMESPathRuntime extends BaseRuntime<Object> {
 
     @Override
     public JmesPathType typeOf(Object value) {
+        System.out.println(value.getClass());
+
         if (value == null) {
             return JmesPathType.NULL;
         } else if (value instanceof Boolean) {

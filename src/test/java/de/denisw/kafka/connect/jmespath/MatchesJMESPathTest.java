@@ -1,19 +1,39 @@
 package de.denisw.kafka.connect.jmespath;
 
-import org.apache.kafka.connect.data.Decimal;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaBuilder;
-import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.data.*;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MatchesJMESPathTest {
+
+    private static final Schema USER_SCHEMA2 = SchemaBuilder
+            .struct()
+            .name("User")
+            .field("email", Schema.STRING_SCHEMA)
+            .field("name", Schema.STRING_SCHEMA)
+            .field("BOD", Timestamp.SCHEMA)
+            .build();
+
+    private static final Struct EXAMPLE_USER2 = new Struct(USER_SCHEMA2)
+            .put("email", "alice@example.com")
+            .put("name", "Alice Example")
+            .put("BOD",new Date(1698644746999L));
+
+    private static final SinkRecord EXAMPLE_RECORD2 = new SinkRecord(
+            "topic",
+            0,
+            null,
+            null,
+            USER_SCHEMA2,
+            EXAMPLE_USER2,
+            0);
 
     private static final Schema ADDRESS_SCHEMA = SchemaBuilder
             .struct()
@@ -93,5 +113,17 @@ class MatchesJMESPathTest {
 
         assertTrue(predicate.test(EXAMPLE_RECORD));
     }
+
+    @Test
+    void MatchingValue2() {
+        MatchesJMESPath.Value<SinkRecord> predicate =
+                new MatchesJMESPath.Value<>();
+
+        predicate.configure(Collections.singletonMap(
+                "query", "BOD >= `1698644746999`"));
+
+        assertTrue(predicate.test(EXAMPLE_RECORD2));
+    }
+
 
 }
