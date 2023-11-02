@@ -1,7 +1,10 @@
 package de.denisw.kafka.connect.jmespath;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import io.burt.jmespath.antlr.v4.runtime.tree.ParseTree;
 import io.burt.jmespath.util.StringEscapeHelper;
@@ -10,9 +13,6 @@ import io.burt.jmespath.parser.ParseErrorAccumulator;
 import io.burt.jmespath.parser.ParseException;
 import io.burt.jmespath.parser.JmesPathBaseVisitor;
 import io.burt.jmespath.parser.JmesPathParser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JsonParserForBigNumeric extends JmesPathBaseVisitor<Object> {
     private static final StringEscapeHelper jsonEscapeHelper = new StringEscapeHelper(
@@ -27,7 +27,6 @@ public class JsonParserForBigNumeric extends JmesPathBaseVisitor<Object> {
             't', '\t'
     );
 
-    private final Logger logger = LoggerFactory.getLogger(JsonParserForBigNumeric.class);
     private final ParseTree tree;
     private final ConnectJMESPathRuntime runtime;
 
@@ -87,9 +86,6 @@ public class JsonParserForBigNumeric extends JmesPathBaseVisitor<Object> {
 
     @Override
     public Object visitJsonObjectValue(JmesPathParser.JsonObjectValueContext ctx) {
-        logger.warn("Visit Object");
-        if (visit(ctx.jsonObject()) instanceof Date || visit(ctx.jsonObject()) instanceof java.sql.Date)
-            logger.warn("Instance of Date ");
         return visit(ctx.jsonObject());
     }
 
